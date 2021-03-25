@@ -12,27 +12,29 @@ import (
 )
 
 type Command struct {
-	Host   string
-	User   string
-	Script string
-	Stdout io.Reader
-	Stderr io.Reader
-	Server Server
+	ServerName string
+	Host       string
+	User       string
+	Script     string
+	Stdout     io.Reader
+	Stderr     io.Reader
+	Server     Server
 }
 
 // Message The message used by channel to transport log line by line
 type Message struct {
-	Host    string
-	Content string
+	ServerName string
+	Content    string
 }
 
 // NewCommand Create a new command
 func NewCommand(server Server) (cmd *Command) {
 	cmd = &Command{
-		Host:   server.Hostname,
-		User:   server.User,
-		Script: fmt.Sprintf("tail %s %s", server.TailFlags, server.TailFile),
-		Server: server,
+		ServerName: server.ServerName,
+		Host:       server.Hostname,
+		User:       server.User,
+		Script:     fmt.Sprintf("tail %s %s", server.TailFlags, server.TailFile),
+		Server:     server,
 	}
 
 	if !strings.Contains(cmd.Host, ":") {
@@ -78,8 +80,8 @@ func (cmd *Command) Execute(output chan Message) {
 		panic(fmt.Sprintf("[%s] redirect stderr failed: %s", cmd.Host, err))
 	}
 
-	go bindOutput(cmd.Host, output, &cmd.Stdout, "", 0)
-	go bindOutput(cmd.Host, output, &cmd.Stderr, "Error:", console.TextRed)
+	go bindOutput(cmd.ServerName, output, &cmd.Stdout, "", 0)
+	go bindOutput(cmd.ServerName, output, &cmd.Stderr, "Error:", console.TextRed)
 
 	if err = session.Start(cmd.Script); err != nil {
 		panic(fmt.Sprintf("[%s] failed to execute command: %s", cmd.Host, err))
@@ -91,13 +93,13 @@ func (cmd *Command) Execute(output chan Message) {
 }
 
 // bing the pipe output for formatted output to channel
-func bindOutput(host string, output chan Message, input *io.Reader, prefix string, color int) {
+func bindOutput(serverName string, output chan Message, input *io.Reader, prefix string, color int) {
 	reader := bufio.NewReader(*input)
 	for {
 		line, err := reader.ReadString('\n')
 		if err != nil || io.EOF == err {
 			if err != io.EOF {
-				panic(fmt.Sprintf("[%s] faield to execute command: %s", host, err))
+				panic(fmt.Sprintf("[%s] faield to execute command: %s", serverName, err))
 			}
 			break
 		}
@@ -108,8 +110,8 @@ func bindOutput(host string, output chan Message, input *io.Reader, prefix strin
 		}
 
 		output <- Message{
-			Host:    host,
-			Content: line,
+			ServerName: serverName,
+			Content:    line,
 		}
 	}
 }

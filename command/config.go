@@ -13,8 +13,8 @@ type Server struct {
 }
 
 type Config struct {
-	TailFile  string            `toml:"tail_file"`
-	Servers   map[string]Server `toml:"servers"`
-	Slient    bool              `toml:"slient"`
-	TailFlags string            `toml:"tail_flags"`
+	TailFile  string   `toml:"tail_file"`
+	Servers   []Server `toml:"servers"`
+	Slient    bool     `toml:"slient"`
+	TailFlags string   `toml:"tail_flags"`
 }

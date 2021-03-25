@@ -14,18 +14,15 @@ import (
 	"github.com/mylxsw/remote-tail/console"
 )
 
-var mossSep = ".--. --- .-- . .-. . -..   -... -.--   -- -.-- .-.. -..- ... .-- \n"
+var mossSep = ".--. --- .-- . .-. . -.. -... -.-- -.- --- -- .- \n"
 
 var welcomeMessage = getWelcomeMessage() + console.ColorfulText(console.TextMagenta, mossSep)
 
 var filePath = flag.String("file", "", "-file=\"/var/log/*.log\"")
 var hostStr = flag.String("hosts", "", "-hosts=root@192.168.1.101,root@192.168.1.102")
-var configFile = flag.String("conf", "", "-conf=example.toml")
+var configFile = flag.String("conf", "config.toml", "-conf=example.toml")
 var tailFlags = flag.String("tail-flags", "--retry --follow=name", "flags for tail command, you can use -f instead if your server does't support `--retry --follow=name` flags")
 var slient = flag.Bool("slient", false, "-slient=false")
-
-var Version = ""
-var GitCommit = ""
 
 func usageAndExit(message string) {
 
@@ -48,7 +45,7 @@ func printWelcomeMessage(config command.Config) {
 			server.TailFile = config.TailFile
 		}
 
-		serverInfo := fmt.Sprintf("%s@%s:%s", server.User, server.Hostname, server.TailFile)
+		serverInfo := fmt.Sprintf("%s %s@%s:%s", server.ServerName, server.User, server.Hostname, server.TailFile)
 		fmt.Println(console.ColorfulText(console.TextMagenta, serverInfo))
 	}
 	fmt.Printf("\n%s\n", console.ColorfulText(console.TextCyan, mossSep))
@@ -66,7 +63,7 @@ func parseConfig(filePath string, hostStr string, configFile string, slient bool
 
 		config = command.Config{}
 		config.TailFile = filePath
-		config.Servers = make(map[string]command.Server, len(hosts))
+		config.Servers = make([]command.Server, len(hosts))
 		config.Slient = slient
 		config.TailFlags = tailFlags
 
@@ -76,12 +73,12 @@ func parseConfig(filePath string, hostStr string, configFile string, slient bool
 			if len(hostInfo) > 2 {
 				port, _ = strconv.Atoi(hostInfo[2])
 			}
-			config.Servers["server_"+string(index)] = command.Server{
-				ServerName: "server_" + string(index),
+			config.Servers = append(config.Servers, command.Server{
+				ServerName: "server_" + strconv.Itoa(index),
 				Hostname:   hostInfo[1],
 				User:       hostInfo[0],
 				Port:       port,
-			}
+			})
 		}
 	}
 
@@ -153,11 +150,11 @@ func main() {
 				}
 
 				if config.Slient {
-					fmt.Printf("%s -> %s\n", output.Host, content)
+					fmt.Printf("%s -> %s\n", output.ServerName, content)
 				} else {
 					fmt.Printf(
 						"%s %s %s\n",
-						console.ColorfulText(console.TextGreen, output.Host),
+						console.ColorfulText(console.TextGreen, output.ServerName),
 						console.ColorfulText(console.TextYellow, "->"),
 						content,
 					)
@@ -179,8 +176,6 @@ func getWelcomeMessage() string {
 |  _ <  __/ | | | | | (_) | ||  __/| | (_| | | |
 |_| \_\___|_| |_| |_|\___/ \__\___||_|\__,_|_|_|
 
-Author: mylxsw
-Homepage: github.com/mylxsw/remote-tail
-Version: ` + Version + "(" + GitCommit + ")" + `
+Author: Koma
 `
 }
