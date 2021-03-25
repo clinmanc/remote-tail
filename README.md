@@ -4,7 +4,15 @@ RemoteTail是一款支持同步显示多台远程服务器的日志文件内容�
 
 RemoteTail只适应于简单的日志收集聚合，如果你不介意重启服务时日志丢失或者重复的问题，那么推荐你尝试一下。
 
-![logo](https://ssl.aicode.cc/remote-tail.jpg?20161011)
+```
+ ____                      _      _____     _ _
+|  _ \ ___ _ __ ___   ___ | |_ __|_   _|_ _(_) |
+| |_) / _ \ '_ ' _ \ / _ \| __/ _ \| |/ _' | | |
+|  _ <  __/ | | | | | (_) | ||  __/| | (_| | | |
+|_| \_\___|_| |_| |_|\___/ \__\___||_|\__,_|_|_|
+
+Author: Koma
+```
 
 ## 使用场景
 
@@ -14,7 +22,7 @@ AB两台服务器中的项目均将日志写到文件系统的`/home/data/logs/l
 
 ## 安装
 
-在[release页面](https://github.com/mylxsw/remote-tail/releases)下载对应的`remote-tail-平台`可执行文件，将该文件加入到系统的`PATH`环境变量指定的目录中即可。
+在[release页面](https://github.com/clinmanc/remote-tail/releases)下载对应的`remote-tail-平台`可执行文件，将该文件加入到系统的`PATH`环境变量指定的目录中即可。
 
 比如，Centos下可以放到`/usr/local/bin`目录。
 
@@ -54,12 +62,11 @@ AB两台服务器中的项目均将日志写到文件系统的`/home/data/logs/l
 
     # 服务器配置,可以配置多个
     # 如果不提供password, 则默认使用系统配置的 ssh-agent 设置，
-    # 你也可以通过指定 private_key_path 配置项来指定使用特定的私钥来登录 (private_key_path=/home/mylxsw/.ssh/id_rsa)
+    # 你也可以通过指定 private_key_path 配置项来指定使用特定的私钥来登录 (private_key_path=/home/koma/.ssh/id_rsa)
     # 私钥如果有密码的话，需要指定 private_key_passphrase 配置项来指定私钥密码
     # server_name, hostname, user 配置为必选,其它可选
-    [servers]
 
-    [servers.1]
+    [[servers]]
     server_name="测试服务器1"
     hostname="test1.server.aicode.cc"
     user="root"
@@ -67,14 +74,14 @@ AB两台服务器中的项目均将日志写到文件系统的`/home/data/logs/l
     # 指定ssh端口，不指定的情况下使用默认值22
     port=2222
 
-    [servers.2]
+    [[servers]]
     server_name="测试服务器2"
     hostname="test2.server.aicode.cc"
     user="root"
     tail_file="/var/log/messages"
     tail_flags="-f"
 
-    [servers.3]
+    [[servers]]
     server_name="测试服务器3"
     hostname="test2.server.aicode.cc"
     user="demo"
@@ -91,7 +98,3 @@ AB两台服务器中的项目均将日志写到文件系统的`/home/data/logs/l
 ## 问题反馈
 
 你可以在github的issue中提出你的bug或者其它需求。
-
-## Stargazers over time
-
-[![Stargazers over time](https://starchart.cc/mylxsw/remote-tail.svg)](https://starchart.cc/mylxsw/remote-tail)
